@@ -1,0 +1,6 @@
+{
+  "name": "Snooker Scoreboard Pro",
+  "description": "A comprehensive Snooker Scoreboard application to track scores, breaks, frames, and manage game flow with an intuitive interface. Supports standard snooker rules for potting balls, fouls, and frame progression.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

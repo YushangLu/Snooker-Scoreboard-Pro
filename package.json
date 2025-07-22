@@ -1,0 +1,55 @@
+{
+  "name": "snooker-scoreboard-pro",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A comprehensive Snooker Scoreboard application.",
+  "author": "Lucian tech",
+  "main": "main.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:build": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^30.0.1",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10"
+  },
+  "build": {
+    "appId": "com.snooker.scoreboard.pro",
+    "productName": "Snooker Scoreboard Pro",
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "build/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.svg"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.svg"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.svg"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

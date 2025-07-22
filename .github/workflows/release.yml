@@ -1,0 +1,124 @@
+# .github/workflows/release.yml
+
+# -----------------------------------------------------------------------------
+# GitHub Actions Workflow: Build & Release Automation
+# -----------------------------------------------------------------------------
+#
+#
+#  Purpose:
+#  --------
+#  This workflow automates the process of building, packaging, and releasing the
+#  Snooker Scoreboard Pro application for Windows, macOS, and Linux.
+#
+#
+#  Trigger:
+#  --------
+#  The workflow is triggered automatically whenever a new Git tag matching the
+#  pattern 'v*' (e.g., v1.0.0, v2.1.3) is pushed to the repository.
+#
+#
+#  How It Works:
+#  -------------
+#  1. BUILD JOB:
+#     - Runs in parallel on three virtual machines (Windows, macOS, Linux).
+#     - Checks out the code, sets up Node.js, and installs dependencies.
+#     - Executes `npm run electron:build` to package the application. It uses
+#       GitHub Secrets for code signing (essential for macOS and Windows).
+#     - Uploads the built application (e.g., .exe, .dmg, .AppImage) as a
+#       temporary "artifact".
+#
+#  2. RELEASE JOB:
+#     - Waits for all three build jobs to complete successfully.
+#     - Downloads all the artifacts from the build jobs.
+#     - Creates a single new "Draft Release" on the GitHub Releases page.
+#     - Attaches all the platform-specific application packages to this release.
+#     - Automatically generates release notes based on commit history.
+#
+#
+#  Setup Required:
+#  ---------------
+#  For code signing to work, you MUST configure the following secrets in your
+#  GitHub repository under: Settings > Secrets and variables > Actions
+#
+#    - APPLE_ID: Your Apple Developer account email.
+#    - APPLE_APP_SPECIFIC_PASSWORD: An app-specific password for your Apple ID.
+#    - CSC_LINK: Your Base64-encoded signing certificate (.p12 or .pfx).
+#    - CSC_KEY_PASSWORD: The password for your signing certificate.
+#
+# -----------------------------------------------------------------------------
+
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags like v1.0.0
+
+jobs:
+  # ===============================================
+  #  Build Job: Compile for each platform
+  # ===============================================
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: 1. Check out the code
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: 3. Install project dependencies
+        run: npm ci
+
+      - name: 4. Build and package the application
+        run: npm run electron:build
+        env:
+          # --- Code Signing Secrets ---
+          # These secrets are required for electron-builder to sign the app.
+          # They must be configured in your repository settings.
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: 5. Upload the built artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: release/ # The directory where electron-builder places the distributables
+
+  # ===============================================
+  #  Release Job: Create GitHub Release
+  # ===============================================
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build # This job only runs if the 'build' job completes successfully for all OSs
+    permissions:
+      contents: write # Required to create a release
+
+    steps:
+      - name: 1. Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/ # Download all artifacts into this directory
+
+      - name: 2. Create Draft Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          # Create the release as a draft. You can review and publish it manually.
+          draft: true
+          # Automatically generate release notes from commits since the last release.
+          generate_release_notes: true
+          # The files to upload as release assets. The glob pattern will find all
+          # built files inside the subdirectories created during download.
+          files: |
+            artifacts/**/*
