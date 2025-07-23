@@ -44,7 +44,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ currentView, onNavigate, onOpenSe
   const isMatchViewActive = currentView === AppStateView.MATCH_SETUP || currentView === AppStateView.SCOREBOARD;
 
   return (
-    <div className="w-full max-w-7xl mx-auto flex justify-between items-center py-2 px-4 sm:px-6 lg:px-8 no-draggable">
+    <div className="w-full flex justify-between items-center py-2 px-4 sm:px-6 lg:px-8 no-draggable">
       <div className="flex items-center space-x-3">
         <SnookerLogoIcon className="w-8 h-8 text-white"/>
         <h1 className="text-xl font-bold text-white tracking-wide">Snooker Scoreboard</h1>

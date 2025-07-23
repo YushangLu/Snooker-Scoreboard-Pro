@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PlayerProfile } from '../types';
 import PlayerCard from './PlayerCard';
 import PlayerFormModal from './PlayerFormModal';
+import ConfirmationModal from './ConfirmationModal';
 
 interface PlayerManagementScreenProps {
   players: PlayerProfile[];
@@ -18,6 +19,7 @@ const PlayerManagementScreen: React.FC<PlayerManagementScreenProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<PlayerProfile | null>(null);
+  const [playerToDelete, setPlayerToDelete] = useState<PlayerProfile | null>(null);
 
   const handleOpenAddModal = () => {
     setEditingPlayer(null);
@@ -29,11 +31,20 @@ const PlayerManagementScreen: React.FC<PlayerManagementScreenProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleDeletePlayer = (playerId: string) => {
-    if (window.confirm('Are you sure you want to delete this player? This cannot be undone.')) {
-      onDeletePlayer(playerId);
+  const requestDeletePlayer = (player: PlayerProfile) => {
+    setPlayerToDelete(player);
+  };
+
+  const handleConfirmDelete = () => {
+    if (playerToDelete) {
+      onDeletePlayer(playerToDelete.id);
+      setPlayerToDelete(null);
     }
   };
+  
+  const handleCancelDelete = () => {
+      setPlayerToDelete(null);
+  }
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -73,7 +84,7 @@ const PlayerManagementScreen: React.FC<PlayerManagementScreenProps> = ({
                 <PlayerCard
                     player={player}
                     onEdit={() => handleOpenEditModal(player)}
-                    onDelete={() => handleDeletePlayer(player.id)}
+                    onDelete={() => requestDeletePlayer(player)}
                 />
             </div>
           ))}
@@ -86,6 +97,16 @@ const PlayerManagementScreen: React.FC<PlayerManagementScreenProps> = ({
           onClose={handleModalClose}
           onSubmit={handleFormSubmit}
           initialData={editingPlayer}
+        />
+      )}
+
+      {playerToDelete && (
+        <ConfirmationModal
+          isOpen={!!playerToDelete}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          title="Delete Player"
+          message={`Are you sure you want to delete ${playerToDelete.name}? This action cannot be undone.`}
         />
       )}
     </div>
