@@ -228,7 +228,7 @@ const App: React.FC = () => {
           />
       </header>
 
-      <main key={currentView} className="w-full flex-grow flex flex-col px-4 sm:px-6 lg:px-8 py-6 no-draggable">
+      <main key={currentView} className="w-full max-w-7xl mx-auto flex-grow flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6 no-draggable">
         {renderContent()}
       </main>
       

@@ -218,10 +218,8 @@ const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
       <div className="lg:col-span-2 flex flex-col gap-6">
         <ScoreDisplay state={state} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FrameInfoDisplay state={state} />
-            <MatchStatisticsDisplay frameHistory={state.frameHistory} player1Name={state.player1Name} player2Name={state.player2Name}/>
-        </div>
+        <FrameInfoDisplay state={state} />
+        <MatchStatisticsDisplay frameHistory={state.frameHistory} player1Name={state.player1Name} player2Name={state.player2Name}/>
       </div>
       <div className="lg:col-span-1">
         <GameControls 

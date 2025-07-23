@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { PlayerProfile } from '../types';
 import PlayerImage from './PlayerImage';
 import { COUNTRIES } from '../constants';
@@ -9,34 +9,24 @@ interface PlayerCardProps {
   onDelete: () => void;
 }
 
-const Flag: React.FC<{ countryCode?: string, countryName?: string }> = ({ countryCode, countryName }) => {
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setError(false);
-  }, [countryCode]);
-
-  if (!countryCode || error) {
-    return <span className="text-4xl" title={countryName || "Unknown"}>🏳️</span>;
-  }
-
-  let code = countryCode.toLowerCase();
-  // flagcdn uses 'gb' for the UK, which is a good fallback for Northern Ireland.
-  if (code === 'gb-nir') {
-    code = 'gb';
-  }
-
-  const flagUrl = `https://flagcdn.com/${code}.svg`;
-
-  return (
-    <img
-      src={flagUrl}
-      alt={countryName || countryCode}
-      title={countryName || countryCode}
-      className="w-16 object-contain rounded-sm shadow-md"
-      onError={() => setError(true)}
-    />
-  );
+const getFlagEmoji = (countryCode?: string) => {
+  if (!countryCode) return '🏳️';
+  
+  // Handle special cases for UK nations
+  const ukMap: {[key: string]: string} = {
+    'GB-ENG': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    'GB-WLS': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+    'GB-SCT': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+    'GB-NIR': '🇬🇧', // No official N.Ireland emoji flag
+  };
+  if(ukMap[countryCode]) return ukMap[countryCode];
+  
+  // Standard ISO 3166-1 alpha-2 codes
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 };
 
 const calculateAge = (dob?: string) => {
@@ -60,7 +50,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, onEdit, onDelete }) => 
       <div>
         <div className="flex items-start justify-between mb-4">
           <PlayerImage imageUrl={player.imageUrl} altText={player.name} size="h-24 w-24" />
-          <Flag countryCode={player.countryCode} countryName={countryName} />
+          <span className="text-5xl" title={countryName}>{getFlagEmoji(player.countryCode)}</span>
         </div>
         <h3 className="text-2xl font-bold text-white truncate">{player.name}</h3>
         <p className="text-sm text-slate-400">{countryName}</p>
