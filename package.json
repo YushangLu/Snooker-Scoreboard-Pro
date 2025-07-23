@@ -37,15 +37,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.svg"
-    },
-    "mac": {
-      "target": "dmg",
-      "icon": "build/icon.svg"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "build/icon.svg"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
