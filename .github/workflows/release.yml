@@ -80,6 +80,8 @@ jobs:
 
       - name: 4. Build and package the application
         run: npm run electron:build
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: 5. Upload the built artifact
         uses: actions/upload-artifact@v4
