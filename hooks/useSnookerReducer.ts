@@ -266,6 +266,45 @@ const snookerReducer = (state: SnookerState, action: SnookerAction): SnookerStat
       break;
     }
 
+    case 'FOUL_ON_POT': {
+      if (newState.gamePhase === GamePhase.FrameOver || newState.gamePhase === GamePhase.MatchOver) return state;
+      const { ball } = action.payload;
+      const foulPoints = Math.max(4, ball.value);
+
+      if (ball.name === RED_BALL.name && newState.remainingReds > 0) {
+        newState.remainingReds--;
+      }
+
+      const foulingPlayerName = getCurrentPlayerName();
+      const benefitingPlayer = opponent(newState.currentTurn);
+      newState.scores[benefitingPlayer] += foulPoints;
+      newState.currentBreak = 0; 
+      newState.currentTurn = benefitingPlayer;
+      
+      if (newState.isWaitingForColorAfterRed && newState.remainingReds === 0 && newState.gamePhase === GamePhase.RedsAvailable) {
+        newState.gamePhase = GamePhase.ColorsSequence;
+        newState.nextColorInSequenceIndex = 0;
+      }
+      newState.isWaitingForColorAfterRed = false;
+      newState.isFoulDialogOpen = false;
+      newState.isFreeBallActive = false;
+      newState.isFreeBallAvailable = true;
+
+      const currentPlayerName = getCurrentPlayerName();
+      let message = `${foulingPlayerName} fouled potting ${ball.name} (${foulPoints} points). ${currentPlayerName}'s turn. Free ball available.`;
+       if (newState.gamePhase === GamePhase.RedsAvailable && newState.remainingReds > 0) {
+        message += ` Pot a Red or take Free Ball.`;
+      } else if (newState.gamePhase === GamePhase.ColorsSequence && newState.nextColorInSequenceIndex < COLORS_IN_SEQUENCE.length) {
+         message += ` Pot ${COLORS_IN_SEQUENCE[newState.nextColorInSequenceIndex].name} or take Free Ball.`;
+      } else if (newState.remainingReds === 0 && newState.gamePhase === GamePhase.RedsAvailable) { 
+        newState.gamePhase = GamePhase.ColorsSequence;
+        newState.nextColorInSequenceIndex = 0;
+        message += ` Pot ${COLORS_IN_SEQUENCE[0].name} or take Free Ball.`;
+      }
+      newState.uiMessage = message;
+      break;
+    }
+
     case 'CONCEDE_FRAME': {
       if (newState.gamePhase === GamePhase.FrameOver || newState.gamePhase === GamePhase.MatchOver) return state;
       const concedingPlayer = newState.currentTurn;

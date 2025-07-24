@@ -106,6 +106,7 @@ export type SnookerAction =
   | { type: 'OPEN_FOUL_DIALOG' }
   | { type: 'CLOSE_FOUL_DIALOG' }
   | { type: 'CONFIRM_FOUL'; payload: { points: number } }
+  | { type: 'FOUL_ON_POT'; payload: { ball: BallType } }
   | { type: 'OPEN_MULTI_RED_DIALOG' }
   | { type: 'CLOSE_MULTI_RED_DIALOG' }
   | { type: 'CONFIRM_MULTI_RED_POT'; payload: { count: number } }
