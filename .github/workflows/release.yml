@@ -29,16 +29,14 @@ jobs:
         run: npm install
 
       - name: Package application
-        # electron-builder requires this token for some functionalities, even when not publishing directly.
-        # Secrets for code signing should be configured in repository settings for this to work.
+        # electron-builder requires this token.
+        # Secrets for code signing should be configured in repository settings.
         run: npm run electron:build -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          # --- Code Signing Secrets (optional but highly recommended for production) ---
-          # For macOS & Windows
-          # CSC_LINK: ${{ secrets.CSC_LINK }} # .p12 or .pfx certificate (base64 encoded)
-          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }} # password for the certificate
-          # For macOS Notarization
+          # --- Code Signing Secrets (optional but recommended) ---
+          # CSC_LINK: ${{ secrets.CSC_LINK }}
+          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           # APPLE_ID: ${{ secrets.APPLE_ID }}
           # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -59,12 +57,13 @@ jobs:
         run: |
           $appName = "${{ env.APP_NAME }}"
           $appVersion = "${{ env.APP_VERSION }}"
-          # Create portable zip from the 'dir' output target configured in package.json
           $portableDir = "release\win-unpacked"
+          $renamedPortableDir = "release\$appName"
           $zipFileName = "$appName-Portable-v$appVersion.zip"
-          # Rename the directory to something cleaner for the user before zipping
+          # Rename the unpacked directory to the application name
           Rename-Item -Path $portableDir -NewName $appName
-          Compress-Archive -Path "$appName" -DestinationPath "release\$zipFileName"
+          # Compress the renamed directory using its new, correct path
+          Compress-Archive -Path $renamedPortableDir -DestinationPath "release\$zipFileName"
           # List files for debugging purposes
           Get-ChildItem -Path release -Recurse
 
@@ -88,7 +87,6 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # This permission is required to create a release and upload assets.
       contents: write
 
     steps:
@@ -96,7 +94,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts/
-          # This will merge all artifacts from different jobs into a single directory
           merge-multiple: true
 
       - name: List downloaded files for debugging
@@ -105,11 +102,8 @@ jobs:
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          # This will upload all files from the artifacts directory
           files: release-artifacts/*
-          # Create a draft release so it can be reviewed before being published
           draft: true
-          # The release body can be customized as needed
           body: |
             Automated release for Snooker Scoreboard Pro.
             See your project's CHANGELOG.md for details on what's new.
