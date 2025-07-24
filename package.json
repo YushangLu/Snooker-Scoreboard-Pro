@@ -1,6 +1,6 @@
 {
   "name": "snooker-scoreboard-pro",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "A comprehensive Snooker Scoreboard application.",
   "author": "Lucian tech",
@@ -30,7 +30,7 @@
     "files": [
       "dist/**/*",
       "main.js",
-      "build/**/*"
+      "assets/**/*"
     ],
     "directories": {
       "output": "release"
@@ -40,7 +40,17 @@
         "nsis",
         "dir"
       ],
-      "icon": "build/icon.ico"
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.sports",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Game",
+      "icon": "assets/icon.png"
     },
     "nsis": {
       "oneClick": false,
